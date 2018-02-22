@@ -1,0 +1,24 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="WSM.SynData.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="timeloop" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">3</Value>
+    </Setting>
+    <Setting Name="timeoff" Type="System.String" Scope="User">
+      <Value Profile="(Default)">[{"tsBegin":"07:30:00","tsEnd":"08:30:00"},{"tsBegin":"16:30:00","tsEnd":"18:00:00"}]</Value>
+    </Setting>
+    <Setting Name="api" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://wsm.framgia.vn/api/enroll_checks</Value>
+    </Setting>
+    <Setting Name="timekillthread" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">15</Value>
+    </Setting>
+    <Setting Name="workspaces" Type="System.String" Scope="User">
+      <Value Profile="(Default)">[{"local":2,"attMachineIp":"ip","attMachinePort":port,"attMachineType":1,"WorkingTime":{"tsBegin":"07:45:00","tsEnd":"16:45:00"}}]</Value>
+    </Setting>
+    <Setting Name="mailreport" Type="System.String" Scope="User">
+      <Value Profile="(Default)">{"mailserver":"smtp.gmail.com","username":"maildemo@gmail.com","password":"encodepass","serverport":587,"issshserver":true,"receiver":"receiver@framgia.com"}</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

@@ -1,0 +1,2 @@
+E:\WSM\WSM.SynData-master\WSM.SynData\bin\Debug\WSM.SynData.exe.config
+E:\WSM\WSM.SynData-master\WSM.SynData\obj\Debug\WSM.SynData.csproj.ResolveComReference.cache
