@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace WSM.SynData
+namespace WSM.SynData.Models
 {
     public class MailClient
     {

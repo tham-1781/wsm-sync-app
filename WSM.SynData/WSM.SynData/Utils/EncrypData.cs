@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace WSM.SynData
+namespace WSM.SynData.Utils
 {
     public class EncrypData
     {
@@ -19,6 +15,7 @@ namespace WSM.SynData
             using (AesCryptoServiceProvider aes = new AesCryptoServiceProvider())
             {
                 aes.Key = Convert.FromBase64String(aes_key);
+                aes.KeySize = 128;
                 aes.IV = Convert.FromBase64String(aes_iv);
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.PKCS7;

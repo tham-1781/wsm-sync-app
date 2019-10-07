@@ -8,17 +8,17 @@
     <Setting Name="timeoff" Type="System.String" Scope="User">
       <Value Profile="(Default)">[{"tsBegin":"07:30:00","tsEnd":"08:30:00"},{"tsBegin":"16:30:00","tsEnd":"18:00:00"}]</Value>
     </Setting>
-    <Setting Name="api" Type="System.String" Scope="User">
-      <Value Profile="(Default)">https://wsm.framgia.vn/api/enroll_checks</Value>
-    </Setting>
     <Setting Name="timekillthread" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">15</Value>
     </Setting>
+    <Setting Name="api" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://wsm.sun-asterisk.vn/api/enroll_checks</Value>
+    </Setting>
     <Setting Name="workspaces" Type="System.String" Scope="User">
-      <Value Profile="(Default)">[{"local":2,"attMachineIp":"ip","attMachinePort":port,"attMachineType":1,"WorkingTime":{"tsBegin":"07:45:00","tsEnd":"16:45:00"}}]</Value>
+      <Value Profile="(Default)">[{"local":4,"attMachineIp":"172.16.26.1","attMachinePort":4370,"attMachineType":1,"WorkingTime":{"tsBegin":"07:45:00","tsEnd":"16:45:00"}}]</Value>
     </Setting>
     <Setting Name="mailreport" Type="System.String" Scope="User">
-      <Value Profile="(Default)">{"mailserver":"smtp.gmail.com","username":"maildemo@gmail.com","password":"encodepass","serverport":587,"issshserver":true,"receiver":"receiver@framgia.com"}</Value>
+      <Value Profile="(Default)">{"mailserver":"smtp.gmail.com","username":"thamit1996@gmail.com","password":"7mp/iwnQ7M5BkhiuGsmNQw==","serverport":587,"issshserver":true,"receiver":"receiver@framgia.com"}</Value>
     </Setting>
   </Settings>
 </SettingsFile>

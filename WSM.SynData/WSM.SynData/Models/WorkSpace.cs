@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
-using log4net;
 using Newtonsoft.Json;
 
-namespace WSM.SynData
+namespace WSM.SynData.Models
 {
     public enum Location
     {
@@ -24,18 +22,18 @@ namespace WSM.SynData
         , IFace = 2
         , TFT = 3
     }
-    public class WorkSpace
+    public class Workspace
     {
         #region Properties
-        public Location local;
-        public string attMachineIp;
-        public int attMachinePort;
-        public MachineType attMachineType;
+        public Location local { get; set; }
+        public string attMachineIp { get; set; }
+        public int attMachinePort { get; set; }
+        public MachineType attMachineType { get; set; }
         public OffTime WorkingTime;
         [JsonIgnore]
         public List<Attendance> lstAtt;
         [JsonIgnore]
-        public zkemkeeper.CZKEMClass connecter;
+        public zkemkeeper.CZKEM connector;
         [JsonIgnore]
         public string ErrorMess;
         [JsonIgnore]
@@ -52,31 +50,46 @@ namespace WSM.SynData
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         #endregion
         #region Methods
-        public WorkSpace(Location lcLocal, string strIP, int iPort, MachineType mtype)
+        public Workspace(Location lcLocal, string strIP, int iPort, MachineType mtype)
         {
             local = lcLocal;
             attMachineIp = strIP;
             attMachinePort = iPort;
             attMachineType = mtype;
-            connecter = new zkemkeeper.CZKEMClass();
+            connector = new zkemkeeper.CZKEM();
             lstAtt = new List<Attendance>();
             //reportmail = new MailClient();
         }
+
+        public string ErrorMessages()
+        {
+            var errorMessages = "";
+            if (string.IsNullOrWhiteSpace(attMachineIp))
+            {
+               errorMessages += $"\n- Machine Ip can't be empty";
+            }
+            if (attMachinePort == 0)
+            {
+                errorMessages += $"\n- Machine port can't be empty";
+            }
+            return errorMessages;
+        }
+
         private bool ConnectDevice()
         {
             try
             {
-                if (connecter.Connect_Net(attMachineIp, attMachinePort))
+                if (connector.Connect_Net(attMachineIp, attMachinePort))
                 {
-                    connecter.RegEvent(1, 65535);
-                    connecter.EnableDevice(1, false);
+                    connector.RegEvent(1, 65535);
+                    connector.EnableDevice(1, false);
                     begin = DateTime.Now;
                     return true;
                 }
                 else
                 {
                     int iError = 0;
-                    connecter.GetLastError(ref iError);
+                    connector.GetLastError(ref iError);
                     ErrorMess = "ConnectDevice | " + attMachineIp + " | Errorcode = " + iError + " | Cannot connect to device";
                     log.Error(ErrorMess);
                     reportmail.SendMail("WSMSyn connect error | " + DateTime.Now.ToString(), ErrorMess);
@@ -89,12 +102,12 @@ namespace WSM.SynData
                 return false;
             }
         }
-        private bool DisconnectDivice()
+        private bool DisconnectDevice()
         {
             try
             {
-                connecter.EnableDevice(1, true);
-                connecter.Disconnect();
+                connector.EnableDevice(1, true);
+                connector.Disconnect();
                 end = DateTime.Now;
                 return true;
             }
@@ -104,6 +117,7 @@ namespace WSM.SynData
                 return false;
             }
         }
+        string years = "";
         private bool GetData(DateTime dtFrom, DateTime dtTo)
         {
             try
@@ -125,13 +139,18 @@ namespace WSM.SynData
                 Attendance item1;
                 Attendance item2;
                 lstAtt.Clear();
-                if (connecter.ReadGeneralLogData(1))
+
+                if (connector.ReadGeneralLogData(1))
                 {
                     if (attMachineType == MachineType.BlackNWhite)
                     {
-                        while (connecter.GetGeneralLogData(1, ref idwTMachineNumber, ref idwEnrollNumber, ref idwEMachineNumber, ref idwVerifyMode,
+                        while (connector.GetGeneralLogData(1, ref idwTMachineNumber, ref idwEnrollNumber, ref idwEMachineNumber, ref idwVerifyMode,
                             ref idwInOutMode, ref idwYear, ref idwMonth, ref idwDay, ref idwHour, ref idwMinute))
                         {
+                            if (DateTime.DaysInMonth(idwYear, idwMonth) < idwDay)
+                                idwDay = DateTime.DaysInMonth(idwYear, idwMonth);
+                            if (idwYear == 2019)
+                                years += idwYear + "\n\n";
                             itemtime = new DateTime(idwYear, idwMonth, idwDay, idwHour, idwMinute, 0);
                             if (itemtime >= dtFrom && itemtime <= dtTo)
                             {
@@ -146,7 +165,7 @@ namespace WSM.SynData
                     }
                     if (attMachineType == MachineType.TFT)
                     {
-                        while (connecter.SSR_GetGeneralLogData(1, out sdwEnrollNumber, out idwVerifyMode,
+                        while (connector.SSR_GetGeneralLogData(1, out sdwEnrollNumber, out idwVerifyMode,
                            out idwInOutMode, out idwYear, out idwMonth, out idwDay, out idwHour, out idwMinute, out idwSecond, ref idwWorkcode))
                         {
                             itemtime = new DateTime(idwYear, idwMonth, idwDay, idwHour, idwMinute, idwSecond);
@@ -167,6 +186,7 @@ namespace WSM.SynData
                     log.Error("GetData | Can't get data from devices");
                     return false;
                 }
+                var ahihi = years;
                 return true;
             }
             catch (Exception ex)
@@ -229,7 +249,7 @@ namespace WSM.SynData
                         else
                             dtFrom = lstAtt.Max(x => x.date);
                     GetData(dtFrom, dtTo);
-                    DisconnectDivice();
+                    DisconnectDevice();
                     SendData();
                     log.Info(attMachineIp + " | " + ErrorMess + " | " + PushCount.ToString() + " | " + begin.ToLongTimeString() + " | "
                         + end.ToLongTimeString() + " | " + (end - begin).TotalSeconds.ToString());
@@ -248,8 +268,14 @@ namespace WSM.SynData
                 if (ConnectDevice())
                 {
                     GetData(dtFrom, dtTo);
-                    DisconnectDivice();
-                    SendData();
+                    DisconnectDevice();
+                    //SendData();
+                    var logs = "";
+                    lstAtt.ForEach(attendance =>
+                    {
+                        logs += $"{attendance.EnrollNumber} - {attendance.date} - {attendance.pushed} \n\n";
+                    });
+
                     log.Info("SynManual | " + attMachineIp + " | " + ErrorMess + " | " + PushCount.ToString() + " | " + begin.ToLongTimeString() + " | "
                         + end.ToLongTimeString() + " | " + (end - begin).TotalSeconds.ToString());
                     lstAtt.Clear();

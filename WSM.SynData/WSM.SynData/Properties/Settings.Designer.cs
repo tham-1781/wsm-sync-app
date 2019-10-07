@@ -12,7 +12,7 @@ namespace WSM.SynData.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "14.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.3.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -50,18 +50,6 @@ namespace WSM.SynData.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://wsm.framgia.vn/api/enroll_checks")]
-        public string api {
-            get {
-                return ((string)(this["api"]));
-            }
-            set {
-                this["api"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("15")]
         public int timekillthread {
             get {
@@ -74,8 +62,20 @@ namespace WSM.SynData.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("[{\"local\":2,\"attMachineIp\":\"ip\",\"attMachinePort\":port,\"attMachineType\":1,\"Working" +
-            "Time\":{\"tsBegin\":\"07:45:00\",\"tsEnd\":\"16:45:00\"}}]")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://wsm.sun-asterisk.vn/api/enroll_checks")]
+        public string api {
+            get {
+                return ((string)(this["api"]));
+            }
+            set {
+                this["api"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("[{\"local\":4,\"attMachineIp\":\"172.16.26.1\",\"attMachinePort\":4370,\"attMachineType\":1" +
+            ",\"WorkingTime\":{\"tsBegin\":\"07:45:00\",\"tsEnd\":\"16:45:00\"}}]")]
         public string workspaces {
             get {
                 return ((string)(this["workspaces"]));
@@ -87,8 +87,9 @@ namespace WSM.SynData.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("{\"mailserver\":\"smtp.gmail.com\",\"username\":\"maildemo@gmail.com\",\"password\":\"encode" +
-            "pass\",\"serverport\":587,\"issshserver\":true,\"receiver\":\"receiver@framgia.com\"}")]
+        [global::System.Configuration.DefaultSettingValueAttribute("{\"mailserver\":\"smtp.gmail.com\",\"username\":\"thamit1996@gmail.com\",\"password\":\"7mp/" +
+            "iwnQ7M5BkhiuGsmNQw==\",\"serverport\":587,\"issshserver\":true,\"receiver\":\"receiver@f" +
+            "ramgia.com\"}")]
         public string mailreport {
             get {
                 return ((string)(this["mailreport"]));

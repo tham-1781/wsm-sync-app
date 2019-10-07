@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:WSM.SynData"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+
     </Application.Resources>
 </Application>
