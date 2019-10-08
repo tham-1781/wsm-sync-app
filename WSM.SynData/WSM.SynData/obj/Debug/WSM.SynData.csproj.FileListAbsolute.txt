@@ -32,3 +32,4 @@ C:\Users\tham\Documents\wsm.synapp\WSM.SynData\WSM.SynData\obj\Debug\Pages\Defau
 C:\Users\tham\Documents\wsm.synapp\WSM.SynData\WSM.SynData\obj\Debug\Pages\Workspaces.g.cs
 C:\Users\tham\Documents\wsm.synapp\WSM.SynData\WSM.SynData\obj\Debug\Pages\DefaultSettings.baml
 C:\Users\tham\Documents\wsm.synapp\WSM.SynData\WSM.SynData\obj\Debug\Pages\Workspaces.baml
+C:\Users\tham\Documents\wsm.synapp\WSM.SynData\WSM.SynData\bin\Debug\wsm.ico

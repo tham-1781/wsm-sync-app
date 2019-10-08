@@ -1,22 +1,29 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 using WSM.SynData.Models;
+using WSM.SynData.ViewModels;
 
 namespace WSM.SynData.Services
 {
     public class WorkspaceService
     {
-        public List<Workspace> GetWorkSpaces()
+        public List<Workspace> GetWorkspaces()
         {
             return JsonConvert.DeserializeObject<List<Workspace>>(Properties.Settings.Default.workspaces);
+        }
+
+        public List<WorkspaceVm> WorkspaceVmList()
+        {
+            var workspaceVmList = GetWorkspaces().Select(wsp => wsp.ToWorkspaceVm());
+            return workspaceVmList.ToList();
         }
 
         public void Update(List<Workspace> workspaces)
         {
             var serializedWorkspaces = JsonConvert.SerializeObject(workspaces);
             Properties.Settings.Default.workspaces = serializedWorkspaces;
-            Properties.Settings.Default.Save();
-            Properties.Settings.Default.Reload();
+            SettingService.Commit(showAlert: false);
         }
 
         public List<Workspace> Add(List<Workspace> source)
@@ -27,6 +34,17 @@ namespace WSM.SynData.Services
                 dataGridSource.Add(workspace);
             }
             dataGridSource.Add(new Workspace(Location.Danang, "", 0, MachineType.BlackNWhite));
+            return dataGridSource;
+        }
+
+        public List<Workspace> Remove(Workspace workspace, List<Workspace> source)
+        {
+            source.Remove(workspace);
+            var dataGridSource = new List<Workspace>();
+            foreach (var item in source)
+            {
+                dataGridSource.Add(item);
+            }
             return dataGridSource;
         }
 

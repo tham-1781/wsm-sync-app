@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
+using WSM.SynData.Utils;
+using WSM.SynData.ViewModels;
 
 namespace WSM.SynData.Models
 {
@@ -22,14 +27,29 @@ namespace WSM.SynData.Models
         , IFace = 2
         , TFT = 3
     }
-    public class Workspace
+    public class Workspace : INotifyPropertyChanged
     {
         #region Properties
         public Location local { get; set; }
         public string attMachineIp { get; set; }
+
         public int attMachinePort { get; set; }
+
+        private bool isChecked = false;
+
+        public bool IsChecked
+        {
+            get { return isChecked; }
+            set
+            {
+                isChecked = value;
+                NotifyPropertyChanged();
+            }
+        }
         public MachineType attMachineType { get; set; }
+        private const int dwMachineNumber = 1;
         public OffTime WorkingTime;
+        public string Note { get; set; }
         [JsonIgnore]
         public List<Attendance> lstAtt;
         [JsonIgnore]
@@ -45,11 +65,16 @@ namespace WSM.SynData.Models
         [JsonIgnore]
         public MailClient reportmail;
         [JsonIgnore]
-        private string uri = SynData.Properties.Settings.Default.api;
+        private string uri = Properties.Settings.Default.api;
         [JsonIgnore]
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         #endregion
         #region Methods
+        public Workspace()
+        {
+            lstAtt = new List<Attendance>();
+            connector = new zkemkeeper.CZKEM();
+        }
         public Workspace(Location lcLocal, string strIP, int iPort, MachineType mtype)
         {
             local = lcLocal;
@@ -61,16 +86,32 @@ namespace WSM.SynData.Models
             //reportmail = new MailClient();
         }
 
+        public WorkspaceVm ToWorkspaceVm()
+        {
+            return new WorkspaceVm()
+            {
+                local = this.local,
+                attMachineIp = this.attMachineIp,
+                attMachinePort = this.attMachinePort,
+                attMachineType = this.attMachineType,
+                Note = this.Note,
+            };
+        }
+
         public string ErrorMessages()
         {
             var errorMessages = "";
             if (string.IsNullOrWhiteSpace(attMachineIp))
             {
-               errorMessages += $"\n- Machine Ip can't be empty";
+                errorMessages += $"\n- Machine Ip can't be empty";
             }
-            if (attMachinePort == 0)
+            if (attMachinePort <= 0)
             {
-                errorMessages += $"\n- Machine port can't be empty";
+                errorMessages += $"\n- Machine port must greater than 0";
+            }
+            if (!attMachineIp.IsValidIPv4())
+            {
+                errorMessages += $"\n- Ip address is invalid";
             }
             return errorMessages;
         }
@@ -81,8 +122,8 @@ namespace WSM.SynData.Models
             {
                 if (connector.Connect_Net(attMachineIp, attMachinePort))
                 {
-                    connector.RegEvent(1, 65535);
-                    connector.EnableDevice(1, false);
+                    connector.RegEvent(dwMachineNumber, 65535);
+                    connector.EnableDevice(dwMachineNumber, false);
                     begin = DateTime.Now;
                     return true;
                 }
@@ -106,7 +147,7 @@ namespace WSM.SynData.Models
         {
             try
             {
-                connector.EnableDevice(1, true);
+                connector.EnableDevice(dwMachineNumber, true);
                 connector.Disconnect();
                 end = DateTime.Now;
                 return true;
@@ -118,6 +159,14 @@ namespace WSM.SynData.Models
             }
         }
         string years = "";
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         private bool GetData(DateTime dtFrom, DateTime dtTo)
         {
             try
@@ -140,11 +189,11 @@ namespace WSM.SynData.Models
                 Attendance item2;
                 lstAtt.Clear();
 
-                if (connector.ReadGeneralLogData(1))
+                if (connector.ReadGeneralLogData(dwMachineNumber))
                 {
                     if (attMachineType == MachineType.BlackNWhite)
                     {
-                        while (connector.GetGeneralLogData(1, ref idwTMachineNumber, ref idwEnrollNumber, ref idwEMachineNumber, ref idwVerifyMode,
+                        while (connector.GetGeneralLogData(dwMachineNumber, ref idwTMachineNumber, ref idwEnrollNumber, ref idwEMachineNumber, ref idwVerifyMode,
                             ref idwInOutMode, ref idwYear, ref idwMonth, ref idwDay, ref idwHour, ref idwMinute))
                         {
                             if (DateTime.DaysInMonth(idwYear, idwMonth) < idwDay)
@@ -165,7 +214,7 @@ namespace WSM.SynData.Models
                     }
                     if (attMachineType == MachineType.TFT)
                     {
-                        while (connector.SSR_GetGeneralLogData(1, out sdwEnrollNumber, out idwVerifyMode,
+                        while (connector.SSR_GetGeneralLogData(dwMachineNumber, out sdwEnrollNumber, out idwVerifyMode,
                            out idwInOutMode, out idwYear, out idwMonth, out idwDay, out idwHour, out idwMinute, out idwSecond, ref idwWorkcode))
                         {
                             itemtime = new DateTime(idwYear, idwMonth, idwDay, idwHour, idwMinute, idwSecond);
@@ -186,7 +235,6 @@ namespace WSM.SynData.Models
                     log.Error("GetData | Can't get data from devices");
                     return false;
                 }
-                var ahihi = years;
                 return true;
             }
             catch (Exception ex)
@@ -199,6 +247,8 @@ namespace WSM.SynData.Models
         {
             try
             {
+                var token = Properties.Settings.Default.token;
+                var companyCode = Properties.Settings.Default.companyCode;
                 PushCount = 0;
                 string strJSON = string.Empty;
                 foreach (var item in lstAtt.Where(x => x.pushed == false))
@@ -207,26 +257,27 @@ namespace WSM.SynData.Models
                     {
                         strJSON += ",";
                     }
-                    strJSON += "{\"EnrollNumber\": " + item.EnrollNumber
-                        + ", \"date\": \"" + item.date.ToString("yyyy-MM-dd HH:mm") + "\"}";
+                    strJSON += "{\"EnrollNumber\": " + item.EnrollNumber + ", \"date\": \"" + item.date.ToString("yyyy-MM-dd HH:mm") + "\"}";
                     PushCount++;
                 }
-                strJSON = "{\"workspace_id\": " + ((int)local).ToString() + ", \"data\": [ " + strJSON + " ] }";
-                strJSON = "{\"attention_data\": [ " + strJSON + " ]}";
-                StringContent stringContent = new StringContent(strJSON, UnicodeEncoding.UTF8, "application/json");
-                HttpClient client = new HttpClient();
-                var response = client.PostAsync(uri, stringContent).Result;
-                if (response.IsSuccessStatusCode)
+                strJSON = "{\"workspace_id\": " + ((int)local).ToString() + ", \"data\": [" + strJSON + " ]}";
+                strJSON = "{\"token\": " + token + ", \"company_code\": " + companyCode + ", \"attendance_records\": [ " + strJSON + " ]}";
+                StringContent stringContent = new StringContent(strJSON, Encoding.UTF8, "application/json");
+                using (HttpClient client = new HttpClient())
                 {
-                    ErrorMess = response.StatusCode.ToString();
-                    foreach (var item in lstAtt.Where(x => x.pushed == false))
-                        item.pushed = true;
-                    return true;
-                }
-                else
-                {
-                    ErrorMess = response.StatusCode.ToString();
-                    return false;
+                    var response = client.PostAsync(uri, stringContent).Result;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        ErrorMess = response.StatusCode.ToString();
+                        foreach (var item in lstAtt.Where(x => x.pushed == false))
+                            item.pushed = true;
+                        return true;
+                    }
+                    else
+                    {
+                        ErrorMess = response.StatusCode.ToString();
+                        return false;
+                    }
                 }
             }
             catch (Exception ex)
@@ -251,7 +302,7 @@ namespace WSM.SynData.Models
                     GetData(dtFrom, dtTo);
                     DisconnectDevice();
                     SendData();
-                    log.Info(attMachineIp + " | " + ErrorMess + " | " + PushCount.ToString() + " | " + begin.ToLongTimeString() + " | "
+                    log.Info(attMachineIp + " | " + ErrorMessage() + " | " + PushCount.ToString() + " | " + begin.ToLongTimeString() + " | "
                         + end.ToLongTimeString() + " | " + (end - begin).TotalSeconds.ToString());
                 }
 
@@ -261,7 +312,8 @@ namespace WSM.SynData.Models
                 log.Error("SynDaily | " + ex.Message);
             }
         }
-        public bool SynManual(DateTime dtFrom, DateTime dtTo)
+
+        public void SynManual(DateTime dtFrom, DateTime dtTo)
         {
             try
             {
@@ -269,25 +321,22 @@ namespace WSM.SynData.Models
                 {
                     GetData(dtFrom, dtTo);
                     DisconnectDevice();
-                    //SendData();
-                    var logs = "";
-                    lstAtt.ForEach(attendance =>
-                    {
-                        logs += $"{attendance.EnrollNumber} - {attendance.date} - {attendance.pushed} \n\n";
-                    });
-
-                    log.Info("SynManual | " + attMachineIp + " | " + ErrorMess + " | " + PushCount.ToString() + " | " + begin.ToLongTimeString() + " | "
+                    SendData();
+                    
+                    log.Info("SynManual | " + attMachineIp + " | " + ErrorMessage() + " | " + PushCount.ToString() + " | " + begin.ToLongTimeString() + " | "
                         + end.ToLongTimeString() + " | " + (end - begin).TotalSeconds.ToString());
-                    lstAtt.Clear();
                 }
-                return true;
             }
             catch (Exception ex)
             {
                 log.Error("SynManual | " + ex.Message);
-                return false;
             }
         }
         #endregion
+
+        private string ErrorMessage()
+        {
+            return string.IsNullOrEmpty(ErrorMess) ? "Success" : ErrorMess;
+        }
     }
 }

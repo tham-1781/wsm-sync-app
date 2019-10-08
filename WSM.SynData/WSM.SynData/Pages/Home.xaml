@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:WSM.SynData.Pages"
       xmlns:m="clr-namespace:WSM.SynData.Master"
+      xmlns:mdl="clr-namespace:WSM.SynData.Models"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="Home">
@@ -20,11 +21,12 @@
                     <RowDefinition Height="3*" />
                     <RowDefinition Height="3*" />
                     <RowDefinition Height="3*" />
+                    <RowDefinition Height="3*" />
                 </Grid.RowDefinitions>
-                <GroupBox Content="Daily" Grid.Row="0" Grid.ColumnSpan="2"></GroupBox>
-                <Button Name="btnStart" Grid.Row="0" Content="Start" Click="btnStart_Click" Grid.ColumnSpan="2" Width="65" Height="27" Margin="156,80,162,70"/>
-                <GroupBox Content="Manualy" Grid.Row="1" Grid.ColumnSpan="2"></GroupBox>
-                <Grid Grid.Row="1" Grid.ColumnSpan="2">
+                <GroupBox Header="Daily sync" Grid.Row="0" Grid.ColumnSpan="2"></GroupBox>
+                <Button HorizontalAlignment="Left" Name="btnStart" Grid.Row="0" Content="Start" Click="btnStart_Click" Grid.Column="0" Width="60" Margin="20, 30, 0, 20" Height="27" />
+                <GroupBox Header="Manualy sync" Grid.Row="1" Grid.ColumnSpan="2"></GroupBox>
+                <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0, 10, 0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="3*"></ColumnDefinition>
                         <ColumnDefinition Width="6*"></ColumnDefinition>
@@ -32,16 +34,49 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="48" />
                         <RowDefinition Height="48" />
-                        <RowDefinition Height="48" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="38" />
                         <RowDefinition Height="48" />
                     </Grid.RowDefinitions>
-                    <Label Grid.Column="0" Grid.Row="0" Content="From" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="20,0,0,0"></Label>
-                    <Label Grid.Column="0" Grid.Row="1" Content="To" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="20,0,0,0"></Label>
+                    <Label Grid.Column="0" Grid.Row="0" Content="From" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="20,0,0,0"></Label>
+                    <Label Grid.Column="0" Grid.Row="1" Content="To" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="20,0,0,0"></Label>
                     <DatePicker Name="dpFrom" Grid.Column="1" Grid.Row="0" Margin="10"></DatePicker>
                     <DatePicker Name="dpTo" Grid.Column="1" Grid.Row="1" Margin="10"></DatePicker>
-                    <ComboBox Name="cbWorkSpace" Grid.Row="2" Grid.Column="1" Margin="10"/>
-                    <Button Name="btnSyn" Grid.Row="3" Content="Syn" Click="btnSyn_Click" Grid.Column="1" Margin="10,1,156,18"/>
+                    <CheckBox Checked="ckbSelectAll_Checked" Unchecked="ckbSelectAll_Unchecked" Name="ckbSelectAll" Grid.Column="1" Grid.Row="2" Content="Select All" Margin="10,10,0,0"></CheckBox>
+                    <ListBox ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" MaxHeight="220" HorizontalContentAlignment="Stretch" Name="lbWorkspaces"  Grid.Row="3" Grid.Column="1" Margin="10">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Expander>
+                                    <Expander.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <CheckBox x:Name="cbCheckAllWsp" CommandParameter="{Binding local}" Click="cbCheckAllWsp_Click" VerticalAlignment="Center" Content="{Binding local}" />
+                                        </StackPanel>
+                                    </Expander.Header>
+                                    <ListBox ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" MaxHeight="180" Margin="0, 5, 0, 0" Name="lbWorkspaceItem" ItemsSource="{Binding}">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <CheckBox CommandParameter="{Binding .}" Checked="cbxWorkspaceItem_Checked" Unchecked="cbxWorkspaceItem_Unchecked" Content="{Binding attMachineIp}" IsChecked="{Binding Path=IsChecked}" />
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Expander>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <ProgressBar Name="prgBarSync" Grid.Row="4" Grid.Column="1" Margin="10,1,156,18"/>
+                    <Button Name="btnSyn" Grid.Row="5" Content="Syn" Click="btnSyn_Click" Grid.Column="1" Margin="10,1,156,18"/>
                 </Grid>
+                <TextBox x:Name="txtSearch" KeyUp="txtSearch_KeyUp" Grid.Row="2" Grid.Column="0" Height="30" Padding="4" Margin="5, 5, 0, 0" />
+                <DataGrid x:Name="dgridAttendances"
+                          Visibility="Hidden"
+                          AutoGenerateColumns="True"
+                    ScrollViewer.CanContentScroll="True"
+                          CanUserResizeColumns="True" CanUserResizeRows="True"
+                    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                          Width="Auto"
+                          MaxHeight="270"
+                    Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10,0,0" />
             </Grid>
         </m:Master.Content>
     </m:Master>

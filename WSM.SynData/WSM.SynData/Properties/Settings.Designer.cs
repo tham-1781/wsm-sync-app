@@ -71,7 +71,37 @@ namespace WSM.SynData.Properties {
                 this["api"] = value;
             }
         }
-        
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("validtoken")]
+        public string token
+        {
+            get
+            {
+                return ((string)(this["token"]));
+            }
+            set
+            {
+                this["token"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("wsm_1")]
+        public string companyCode
+        {
+            get
+            {
+                return ((string)(this["companyCode"]));
+            }
+            set
+            {
+                this["companyCode"] = value;
+            }
+        }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("[{\"local\":4,\"attMachineIp\":\"172.16.26.1\",\"attMachinePort\":4370,\"attMachineType\":1" +
@@ -87,9 +117,9 @@ namespace WSM.SynData.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("{\"mailserver\":\"smtp.gmail.com\",\"username\":\"thamit1996@gmail.com\",\"password\":\"7mp/" +
-            "iwnQ7M5BkhiuGsmNQw==\",\"serverport\":587,\"issshserver\":true,\"receiver\":\"receiver@f" +
-            "ramgia.com\"}")]
+        [global::System.Configuration.DefaultSettingValueAttribute("{\"mailserver\":\"smtp.gmail.com\",\"username\":\"youremail@gmail.com\",\"password\":\"7mp/i" +
+            "wnQ7M5BkhiuGsmNQw==\",\"serverport\":587,\"issshserver\":true,\"receiver\":\"receiver@su" +
+            "n-asterisk.com\"}")]
         public string mailreport {
             get {
                 return ((string)(this["mailreport"]));
